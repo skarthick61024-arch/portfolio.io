@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>karthicks Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-cyan': '#00f3ff',
+                        'neon-pink': '#ff00ff',
+                        'neon-purple': '#bc13fe',
+                        'dark-bg': '#050505',
+                        'glass': 'rgba(255, 255, 255, 0.05)'
+                    },
+                    animation: {
+                        'marquee': 'marquee 25s linear infinite',
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        },
+                        blob: {
+                            "0%": { transform: "translate(0px, 0px) scale(1)" },
+                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                            "100%": { transform: "translate(0px, 0px) scale(1)" }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Tailwind v4 Browser CDN (required) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Import Map for ES Modules -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "framer-motion": "https://esm.sh/framer-motion@11.0.3?external=react,react-dom",
+            "lucide-react": "https://esm.sh/lucide-react@0.330.0?external=react,react-dom"
+        }
+    }
+    </script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { margin: 0; background-color: #050505; color: white; overflow-x: hidden; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom Cursor */
+        .cursor-dot, .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+        }
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        .blob-bg {
+            position: absolute;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.6;
+        }
+        /* 3D Robot Scene - New, cleaner friendly bot */
+        .robot-scene {
+            perspective: 1400px;
+        }
+        .robot-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 32px;
+            padding: 26px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0,243,255,0.25), transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(188,19,254,0.22), transparent 60%),
+                linear-gradient(145deg, #0b0c10, #050509);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow:
+                0 32px 90px rgba(0,0,0,0.95),
+                0 0 0 1px rgba(255,255,255,0.05);
+            transform-style: preserve-3d;
+            transform: rotateX(18deg) rotateY(-22deg) translateY(8px);
+            animation: robot-float 7.5s ease-in-out infinite;
+            overflow: hidden;
+        }
+        .robot-card::before {
+            content: "";
+            position: absolute;
+            inset: -40px;
+            background: conic-gradient(from 220deg, rgba(0,243,255,0.55), rgba(188,19,254,0.4), rgba(255,0,255,0.35), rgba(0,243,255,0.55));
+            opacity: 0.35;
+            filter: blur(40px);
+            z-index: -1;
+        }
+        .robot-inner-shadow {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+            pointer-events: none;
+        }
+        .robot-body {
+            position: absolute;
+            inset: 26% 14% 16% 14%;
+            background: radial-gradient(circle at 50% 0%, rgba(0,243,255,0.35), transparent 55%),
+                        linear-gradient(145deg, #f9fafb, #d1d5db);
+            border-radius: 26px;
+            box-shadow:
+                0 24px 45px rgba(0,0,0,0.85),
+                0 0 0 1px rgba(148,163,184,0.7);
+            transform: translateZ(36px);
+        }
+        .robot-body-panel {
+            position: absolute;
+            inset: 16% 14% 24% 14%;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0,243,255,0.4), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(188,19,254,0.35), transparent 55%),
+                #020617;
+            box-shadow:
+                inset 0 0 28px rgba(15,23,42,0.95),
+                0 0 30px rgba(0,243,255,0.3);
+        }
+        .robot-core-ring {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            width: 118px;
+            height: 118px;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            border: 2px solid rgba(15,23,42,0.7);
+            box-shadow:
+                0 0 25px rgba(0,243,255,0.55),
+                inset 0 0 22px rgba(0,0,0,0.9);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(0,243,255,0.6), transparent 60%),
+                radial-gradient(circle at 50% 100%, rgba(188,19,254,0.5), transparent 60%);
+        }
+        .robot-core-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            background: radial-gradient(circle at 50% 30%, #ffffff, #00f3ff);
+            box-shadow:
+                0 0 28px rgba(0,243,255,0.9),
+                0 0 80px rgba(0,243,255,0.6);
+            animation: core-pulse 2.1s ease-in-out infinite;
+        }
+        .robot-head {
+            position: absolute;
+            top: -24%;
+            left: 50%;
+            width: 62%;
+            height: 56%;
+            transform: translateX(-50%) translateZ(70px);
+            border-radius: 34px;
+            background: linear-gradient(145deg, #f9fafb, #e5e7eb);
+            box-shadow:
+                0 32px 55px rgba(0,0,0,0.95),
+                0 0 0 1px rgba(148,163,184,0.9);
+        }
+        .robot-head::before {
+            content: "";
+            position: absolute;
+            inset: -12px;
+            border-radius: inherit;
+            background: conic-gradient(from 200deg, rgba(0,243,255,0.7), rgba(188,19,254,0.4), rgba(255,0,255,0.35), rgba(0,243,255,0.7));
+            opacity: 0.55;
+            filter: blur(26px);
+            z-index: -1;
+        }
+        .robot-face {
+            position: absolute;
+            inset: 18% 14% 22% 14%;
+            border-radius: 26px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(0,243,255,0.4), transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(188,19,254,0.35), transparent 60%),
+                radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), #020617 70%);
+            box-shadow:
+                inset 0 0 50px rgba(0,0,0,0.95),
+                0 0 40px rgba(0,243,255,0.35);
+            overflow: hidden;
+        }
+        .robot-face-scan {
+            position: absolute;
+            inset: -40% 0 50% 0;
+            background: linear-gradient(180deg, transparent, rgba(0,243,255,0.12), transparent);
+            animation: face-scan 4s linear infinite;
+        }
+        .robot-eyes {
+            position: absolute;
+            top: 38%;
+            left: 50%;
+            width: 60%;
+            height: 30px;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .robot-eye {
+            position: relative;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00f3ff);
+            box-shadow: 0 0 20px rgba(0,243,255,0.9);
+            overflow: hidden;
+        }
+        .robot-eye-inner {
+            position: absolute;
+            inset: 3px;
+            border-radius: inherit;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00f3ff 60%, #00141a 100%);
+            transform-origin: center;
+            transition: transform 0.18s ease-out;
+        }
+        .robot-eye-glow {
+            position: absolute;
+            inset: -10%;
+            border-radius: inherit;
+            background: radial-gradient(circle at 30% 10%, rgba(255,255,255,0.9), transparent 55%);
+            opacity: 0.9;
+        }
+        .robot-mouth {
+            position: absolute;
+            left: 50%;
+            bottom: 22%;
+            width: 54%;
+            height: 10px;
+            transform: translateX(-50%);
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, rgba(0,243,255,0.9), rgba(188,19,254,0.9), transparent);
+            box-shadow: 0 0 22px rgba(0,243,255,0.7);
+            overflow: hidden;
+        }
+        .robot-mouth::before {
+            content: "";
+            position: absolute;
+            inset: 1px 18px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.9), transparent 65%);
+            opacity: 0.85;
+        }
+        .robot-antenna {
+            position: absolute;
+            top: -34px;
+            left: 50%;
+            width: 4px;
+            height: 32px;
+            transform: translateX(-50%) translateZ(80px);
+            border-radius: 999px;
+            background: linear-gradient(#00f3ff, #bc13fe);
+            box-shadow: 0 0 18px rgba(0,243,255,0.7);
+        }
+        .robot-antenna::before {
+            content: "";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff00ff);
+            box-shadow:
+                0 0 16px rgba(255,0,255,0.95),
+                0 0 40px rgba(0,243,255,0.85);
+            animation: antenna-pulse 1.6s ease-in-out infinite;
+        }
+        .robot-arm {
+            position: absolute;
+            top: 38%;
+            width: 18%;
+            height: 32%;
+            border-radius: 999px;
+            background: linear-gradient(145deg, #e5e7eb, #cbd5f5);
+            box-shadow: 0 18px 30px rgba(0,0,0,0.9);
+            transform-origin: top center;
+        }
+        .robot-arm.left {
+            left: -6%;
+            transform: translateZ(28px) rotateZ(8deg);
+        }
+        .robot-arm.right {
+            right: -6%;
+            transform-origin: top left;
+            transform: translateZ(32px) rotateZ(-12deg) rotateY(-6deg);
+            animation: robot-wave 1.5s ease-in-out infinite alternate;
+        }
+        .robot-arm-end {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            transform: translateX(-50%);
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00f3ff);
+            box-shadow: 0 0 22px rgba(0,243,255,0.9);
+        }
+        .robot-torso-strip {
+            position: absolute;
+            left: 50%;
+            top: 24%;
+            width: 72%;
+            height: 10px;
+            transform: translateX(-50%) translateZ(46px);
+            border-radius: 999px;
+            background: linear-gradient(90deg, #00f3ff, #bc13fe, #ff00ff);
+            box-shadow: 0 0 22px rgba(0,243,255,0.45);
+        }
+        .robot-torso-dots {
+            position: absolute;
+            left: 50%;
+            top: 33%;
+            width: 44%;
+            height: 7px;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .robot-torso-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00f3ff);
+            box-shadow: 0 0 10px rgba(0,243,255,0.75);
+            opacity: 0.85;
+        }
+        .robot-torso-dot:nth-child(2) {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #bc13fe);
+        }
+        .robot-torso-dot:nth-child(3) {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ff00ff);
+        }
+        .robot-base-plate {
+            position: absolute;
+            inset: auto 12% 3% 12%;
+            height: 20%;
+            border-radius: 999px;
+            background: radial-gradient(circle at 50% 10%, #111827, #020617);
+            box-shadow:
+                0 32px 60px rgba(0,0,0,1),
+                0 0 0 1px rgba(15,23,42,0.9);
+            transform: translateZ(14px);
+        }
+        .robot-base-glow {
+            position: absolute;
+            inset: auto 10% -6% 10%;
+            height: 32%;
+            border-radius: 999px;
+            background: radial-gradient(circle at 50% 0, rgba(0,243,255,0.5), transparent 72%);
+            filter: blur(18px);
+        }
+        .robot-orbit-ring {
+            position: absolute;
+            inset: 45% 8% 30% 8%;
+            border-radius: 999px;
+            border: 1px dashed rgba(0,243,255,0.6);
+            transform: translateZ(26px) rotateX(78deg);
+            box-shadow: 0 0 34px rgba(0,243,255,0.25);
+        }
+        .robot-orbit-dot {
+            position: absolute;
+            top: 50%;
+            left: 8%;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00f3ff;
+            box-shadow: 0 0 20px rgba(0,243,255,0.9);
+            animation: robot-orbit 6.2s linear infinite;
+        }
+        .robot-hi-bubble {
+            position: absolute;
+            top: -6%;
+            right: -4%;
+            transform: translateZ(120px);
+            background: rgba(15,23,42,0.98);
+            border-radius: 999px;
+            padding: 10px 18px;
+            border: 1px solid rgba(148,163,184,0.85);
+            box-shadow:
+                0 20px 40px rgba(0,0,0,0.95),
+                0 0 18px rgba(0,243,255,0.55);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .robot-hi-bubble span:nth-child(1) {
+            color: #ffffff;
+        }
+        .robot-hi-bubble span:nth-child(2) {
+            color: #00f3ff;
+        }
+        .robot-hi-bubble span:nth-child(3) {
+            color: #bc13fe;
+        }
+        .robot-hi-bubble::after {
+            content: "";
+            position: absolute;
+            bottom: -7px;
+            right: 22px;
+            width: 14px;
+            height: 14px;
+            background: inherit;
+            border-right: 1px solid rgba(148,163,184,0.85);
+            border-bottom: 1px solid rgba(148,163,184,0.85);
+            transform: rotate(45deg);
+        }
+        .robot-floating-badges {
+            position: absolute;
+            inset: 10% 8% 10% auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: translateZ(80px);
+            pointer-events: none;
+        }
+        .robot-badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15,23,42,0.98);
+            border: 1px solid rgba(148,163,184,0.85);
+            color: #e5e7eb;
+            box-shadow:
+                0 12px 28px rgba(0,0,0,0.95),
+                0 0 18px rgba(0,243,255,0.35);
+        }
+        .robot-badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #00f3ff);
+            box-shadow: 0 0 10px rgba(0,243,255,0.85);
+        }
+        @keyframes robot-float {
+            0%, 100% {
+                transform: rotateX(18deg) rotateY(-22deg) translateY(8px);
+            }
+            50% {
+                transform: rotateX(12deg) rotateY(-16deg) translateY(-10px);
+            }
+        }
+        @keyframes robot-wave {
+            0% {
+                transform: translateZ(32px) rotateZ(-8deg) rotateY(-4deg);
+            }
+            100% {
+                transform: translateZ(32px) rotateZ(22deg) rotateY(10deg);
+            }
+        }
+        @keyframes robot-orbit {
+            0% {
+                transform: translate3d(0, -50%, 0) rotate(0deg) translateX(80%);
+            }
+            100% {
+                transform: translate3d(0, -50%, 0) rotate(360deg) translateX(80%);
+            }
+        }
+        @keyframes antenna-pulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+                box-shadow:
+                    0 0 16px rgba(255,0,255,0.95),
+                    0 0 40px rgba(0,243,255,0.85);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.2);
+                box-shadow:
+                    0 0 26px rgba(255,0,255,1),
+                    0 0 60px rgba(0,243,255,0.95);
+            }
+        }
+        @keyframes core-pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.12);
+                opacity: 0.8;
+            }
+        }
+        @keyframes face-scan {
+            0% {
+                transform: translateY(-120%);
+            }
+            100% {
+                transform: translateY(120%);
+            }
+        }
+        /* 3D Project Card Scene */
+        .project-3d-scene {
+            perspective: 1400px;
+        }
+        .project-3d-card {
+            transform-style: preserve-3d;
+            transform: rotateX(18deg) rotateY(-18deg) translateY(26px);
+            transition:
+                transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+                box-shadow 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+            box-shadow:
+                0 40px 80px rgba(0, 0, 0, 0.9),
+                0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+        .project-3d-scene:hover .project-3d-card {
+            transform: rotateX(10deg) rotateY(-8deg) translateY(0px);
+            box-shadow:
+                0 50px 100px rgba(0, 0, 0, 1),
+                0 0 40px rgba(0, 243, 255, 0.4);
+        }
+        .project-3d-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: conic-gradient(from 220deg, rgba(0, 243, 255, 0.4), rgba(188, 19, 254, 0.3), rgba(255, 0, 255, 0.2), rgba(0, 243, 255, 0.4));
+            opacity: 0;
+            filter: blur(18px);
+            transition: opacity 0.6s ease;
+            z-index: -1;
+        }
+        .project-3d-scene:hover .project-3d-card::before {
+            opacity: 1;
+        }
+    </style>
+    <!-- Optional: Web Component for GLB 3D models -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <!-- EmailJS for email integration -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // TODO: Replace "YOUR_PUBLIC_KEY" with your actual EmailJS public key
+            emailjs.init("mZbcb6COyXSSs5Lcz");
+        })();
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { motion, AnimatePresence } from 'framer-motion';
+        import { Github, Linkedin, Mail, ExternalLink, Layers, Send, CheckCircle, Monitor, MessageSquare, ShoppingCart } from 'lucide-react';
+
+        // --- Components ---
+
+        // Custom Cursor
+        const Cursor = () => {
+            const [position, setPosition] = useState({ x: 0, y: 0 });
+            const [hidden, setHidden] = useState(false);
+            const [clicked, setClicked] = useState(false);
+
+            useEffect(() => {
+                const mMove = (el) => {
+                    setPosition({ x: el.clientX, y: el.clientY });
+                };
+
+                const mEnter = () => setHidden(false);
+                const mLeave = () => setHidden(true);
+                const mDown = () => setClicked(true);
+                const mUp = () => setClicked(false);
+
+                const addEventListeners = () => {
+                    document.addEventListener("mousemove", mMove);
+                    document.addEventListener("mouseenter", mEnter);
+                    document.addEventListener("mouseleave", mLeave);
+                    document.addEventListener("mousedown", mDown);
+                    document.addEventListener("mouseup", mUp);
+                };
+
+                const removeEventListeners = () => {
+                    document.removeEventListener("mousemove", mMove);
+                    document.removeEventListener("mouseenter", mEnter);
+                    document.removeEventListener("mouseleave", mLeave);
+                    document.removeEventListener("mousedown", mDown);
+                    document.removeEventListener("mouseup", mUp);
+                };
+
+                addEventListeners();
+                return removeEventListeners;
+            }, []);
+
+            if (typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                return null;
+            }
+
+            return (
+                <>
+                    <div 
+                        className="cursor-dot"
+                        style={{ 
+                            left: `${position.x}px`, 
+                            top: `${position.y}px`,
+                            opacity: hidden ? 0 : 1 
+                        }}
+                    />
+                    <div 
+                        className={`cursor-outline ${clicked ? 'scale-75 bg-white/20' : ''}`}
+                        style={{ 
+                            left: `${position.x}px`, 
+                            top: `${position.y}px`,
+                            opacity: hidden ? 0 : 1 
+                        }}
+                    />
+                </>
+            );
+        };
+
+        // Navigation Bar
+        const Navbar = () => {
+            const [scrolled, setScrolled] = useState(false);
+            const [isOpen, setIsOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const navLinks = [
+                { name: 'Work', href: '#projects' },
+                { name: 'Skills', href: '#skills' },
+                { name: 'Contact', href: '#contact' },
+            ];
+
+            return (
+                <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-dark-bg/80 backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'}`}>
+                    <div className="container mx-auto px-6 flex justify-between items-center">
+                        <motion.a 
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            href="#" 
+                            className="text-2xl font-black text-white tracking-tighter relative z-50"
+                        >
+                            KARTHICKS<span className="text-neon-cyan"><div class=".PORTFOLIO"></div></span>
+                        </motion.a>
+
+                        {/* Desktop Menu */}
+                        <div className="hidden md:flex items-center gap-8">
+                            {navLinks.map((link, i) => (
+                                <motion.a 
+                                    key={link.name}
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    href={link.href} 
+                                    className="text-sm font-medium text-gray-300 hover:text-neon-cyan transition-colors"
+                                >
+                                    {link.name}
+                                </motion.a>
+                            ))}
+                            <motion.a 
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.3 }}
+                                href="/resume.pdf" 
+                                download
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-sm font-bold text-white transition-all flex items-center gap-2 group"
+                            >
+                                <span>Resume</span>
+                                <ExternalLink size={14} className="group-hover:translate-x-1 transition-transform" />
+                            </motion.a>
+                        </div>
+
+                        {/* Mobile Toggle */}
+                        <div className="md:hidden z-50">
+                            <button onClick={() => setIsOpen(!isOpen)} className="text-white p-2">
+                                {isOpen ? <ExternalLink className="rotate-45" /> : <Layers className="rotate-90" />}
+                            </button>
+                        </div>
+
+                        {/* Mobile Menu */}
+                        <AnimatePresence>
+                            {isOpen && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    className="absolute top-full left-0 w-full bg-dark-bg border-b border-white/10 p-6 flex flex-col gap-4 md:hidden shadow-2xl"
+                                >
+                                    {navLinks.map((link) => (
+                                        <a 
+                                            key={link.name}
+                                            href={link.href} 
+                                            onClick={() => setIsOpen(false)}
+                                            className="text-lg font-medium text-gray-300 hover:text-neon-cyan"
+                                        >
+                                            {link.name}
+                                        </a>
+                                    ))}
+                                    <a 
+                                        href="/resume.pdf" 
+                                        download
+                                        className="px-5 py-3 bg-neon-cyan/10 text-neon-cyan text-center rounded-lg font-bold border border-neon-cyan/20"
+                                    >
+                                        Download Resume
+                                    </a>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </nav>
+            );
+        };
+
+        // Hero Video Background
+        const HeroVideoBackground = () => {
+            return (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-black/70 z-10"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-dark-bg/80 z-20"></div>
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-20 mix-blend-overlay"></div>
+                    
+                    {/* Video Background */}
+                    <video 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        className="w-full h-full object-cover opacity-40 scale-105"
+                    >
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-digital-connection-lines-2844-large.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            );
+        };
+
+        // Skill Marquee
+        const SkillMarquee = () => {
+            const skills = ["React", "JavaScript", "HTML", "CSS", "Tailwind", "Node.js", "Python", "MongoDB", "MySQL", "Django", "AI Tools", "GSAP", "Framer Motion", "Shadcn"];
+            return (
+                <div className="relative w-full overflow-hidden bg-black/50 py-4 border-y border-white/10 z-20">
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-black via-transparent to-black z-10"></div>
+                    <div className="flex whitespace-nowrap animate-marquee">
+                        {[...skills, ...skills, ...skills].map((skill, i) => (
+                            <span key={i} className="text-xl md:text-2xl font-bold mx-8 text-gray-400 hover:text-neon-cyan transition-colors duration-300 uppercase tracking-wider">
+                                {skill}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // 3D Robot Component for About Section using external 3D model
+        const Robot3D = () => {
+            // If you have your own .glb model, paste its URL here.
+            // When GLB_URL is not empty, the viewer will use <model-viewer> instead of Sketchfab.
+            const GLB_URL = "robot_playground.glb"; // e.g. "https://your-cdn.com/robot.glb"
+            const useGLB = GLB_URL.trim().length > 0;
+
+            return (
+                <motion.div
+                    className="robot-scene w-full aspect-square max-w-md mx-auto"
+                    initial={{ opacity: 0, x: -40, scale: 0.9 }}
+                    whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <div className="robot-card flex items-stretch justify-center">
+                        <div className="relative w-full h-full rounded-3xl overflow-hidden bg-black/40 border border-white/10">
+                            {useGLB ? (
+                                <model-viewer
+                                    src={GLB_URL}
+                                    autoplay
+                                    camera-controls
+                                    interaction-prompt="auto"
+                                    exposure="1"
+                                    shadow-intensity="1"
+                                    style={{ width: "100%", height: "100%", background: "transparent" }}
+                                />
+                            ) : (
+                                <iframe
+                                    title="3D Robot"
+                                    className="w-full h-full"
+                                    src="https://sketchfab.com/models/6QXFq/embed?autostart=1&camera=0&ui_theme=dark"
+                                    allow="autoplay; fullscreen; xr-spatial-tracking"
+                                    allowFullScreen
+                                    loading="lazy"
+                                />
+                            )}
+
+                            {/* Overlay gradient for better integration with the card */}
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/70" />
+
+                            {/* Bottom caption */}
+                            <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-center px-4">
+                                <p className="text-[10px] font-mono tracking-[0.25em] uppercase text-neon-cyan mb-1">
+                                    3D Assistant
+                                </p>
+                                <p className="text-sm font-semibold text-white">
+                                    Hi, I&apos;m Karthick&apos;s interactive robot.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // Horizontal Project Gallery with Framer Motion
+        const ProjectCard = ({ project, index }) => {
+            const [isHovered, setIsHovered] = useState(false);
+
+            return (
+                <motion.div 
+                    className="project-3d-scene relative min-w-[350px] md:min-w-[450px] h-[600px] mx-4 cursor-grab active:cursor-grabbing"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ delay: index * 0.2, duration: 0.6, type: "spring" }}
+                    onHoverStart={() => setIsHovered(true)}
+                    onHoverEnd={() => setIsHovered(false)}
+                >
+                    {/* 3D Card Container */}
+                    <div className="project-3d-card relative w-full h-full rounded-3xl overflow-hidden bg-gradient-to-br from-gray-900 to-black border border-white/10 shadow-2xl group">
+                        {/* Background Glow */}
+                        <motion.div 
+                            className="absolute -inset-1 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan rounded-3xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 -z-10"
+                            animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
+                        />
+                        
+                        {/* Image Section */}
+                        <div className="relative h-[65%] overflow-hidden">
+                            <motion.div 
+                                className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"
+                                animate={isHovered ? { opacity: 0.3 } : { opacity: 0.7 }}
+                            />
+                            <motion.img 
+                                src={project.image} 
+                                alt={project.title}
+                                className="w-full h-full object-cover"
+                                animate={isHovered ? { scale: 1.15 } : { scale: 1 }}
+                                transition={{ duration: 0.6 }}
+                            />
+                            
+                            {/* Icon Badge */}
+                            <motion.div 
+                                className="absolute top-6 right-6 z-20 w-14 h-14 bg-black/60 backdrop-blur-lg rounded-full flex items-center justify-center border border-white/20 text-neon-cyan"
+                                whileHover={{ rotate: 360, scale: 1.2 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                {project.icon}
+                            </motion.div>
+
+                            {/* Tech Tags */}
+                            <motion.div 
+                                className="absolute bottom-6 left-6 z-20 flex flex-wrap gap-2"
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={isHovered ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                {project.tags.map((tag, i) => (
+                                    <motion.span 
+                                        key={i} 
+                                        className="px-3 py-1.5 text-xs font-semibold bg-black/80 backdrop-blur-md border border-white/20 rounded-full text-white"
+                                        initial={{ scale: 0 }}
+                                        animate={isHovered ? { scale: 1 } : { scale: 0 }}
+                                        transition={{ delay: i * 0.1 }}
+                                    >
+                                        {tag}
+                                    </motion.span>
+                                ))}
+                            </motion.div>
+                        </div>
+                        
+                        {/* Content Section */}
+                        <div className="relative h-[35%] p-6 flex flex-col justify-between bg-gradient-to-b from-gray-900/95 to-black/95 backdrop-blur-sm border-t border-white/5">
+                            <div>
+                                <motion.h3 
+                                    className="text-2xl font-bold text-white mb-3 line-clamp-1"
+                                    animate={isHovered ? { color: "#00f3ff" } : { color: "#ffffff" }}
+                                >
+                                    {project.title}
+                                </motion.h3>
+                                <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                                    {project.description}
+                                </p>
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="flex justify-between items-center mt-4">
+                                <motion.a 
+                                    href={project.link || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-full text-sm font-bold text-white shadow-lg"
+                                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0, 243, 255, 0.5)" }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    View Live <ExternalLink size={16} />
+                                </motion.a>
+                                <motion.a 
+                                    href={project.github || "#"} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white"
+                                    whileHover={{ scale: 1.2, rotate: 15, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                                    whileTap={{ scale: 0.9 }}
+                                >
+                                    <Github size={20} />
+                                </motion.a>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const ProjectShowcase = () => {
+            const constraintsRef = useRef(null);
+            const scrollContainerRef = useRef(null);
+            const [activeIndex, setActiveIndex] = useState(0);
+            const [isPaused, setIsPaused] = useState(false);
+
+            const projects = [
+                {
+                    title: "E-Commerce Platform",
+                    description: "This makes it clear that you've focused on the frontend development with React.js.",
+                    tags: ["React.js"],
+                    image: "ecom.png",
+                    icon: <ShoppingCart size={20} />,
+                    link: "https://ecommerce-site-w2yv.vercel.app/",
+                    github: "#"
+                },
+                {
+                    title: "AI Chatbot ",
+                    description: "Single WeB Page  AI Bot With Image Generation  .",
+                    tags: ["React.js", "OpenAI API"],
+                    image: "bot.webp",
+                    icon: <MessageSquare size={20} />,
+                    link: "https://aibot-omega-one.vercel.app/",
+                    github: "#"
+                },
+                {
+                    title: "Portfolio Website",
+                    description: "The immersive interactive site you are currently viewing, featuring advanced animations, motion graphics, and responsive design principles.",
+                    tags: ["React", "Framer Motion", "Tailwind"],
+                    image: "port.png",
+                    icon: <Monitor size={20} />
+                }
+            ];
+
+            // Auto-scroll functionality
+            useEffect(() => {
+                if (isPaused || !scrollContainerRef.current) return;
+
+                const interval = setInterval(() => {
+                    const container = scrollContainerRef.current;
+                    const cardWidth = 450 + 32; // card width + margin
+                    const maxScroll = (projects.length * cardWidth) - container.offsetWidth;
+                    
+                    const currentScroll = container.scrollLeft;
+                    const nextScroll = currentScroll + cardWidth;
+
+                    if (nextScroll >= maxScroll) {
+                        container.scrollTo({ left: 0, behavior: 'smooth' });
+                        setActiveIndex(0);
+                    } else {
+                        container.scrollTo({ left: nextScroll, behavior: 'smooth' });
+                        setActiveIndex(Math.round(nextScroll / cardWidth));
+                    }
+                }, 3000);
+
+                return () => clearInterval(interval);
+            }, [isPaused, projects.length]);
+
+            const handleScroll = () => {
+                if (!scrollContainerRef.current) return;
+                const container = scrollContainerRef.current;
+                const cardWidth = 450 + 32;
+                const newIndex = Math.round(container.scrollLeft / cardWidth);
+                setActiveIndex(newIndex);
+            };
+
+            return (
+                <section className="py-32 relative bg-dark-bg overflow-hidden" id="projects">
+                    <div className="absolute top-1/2 left-0 w-96 h-96 bg-neon-purple/10 rounded-full blur-[120px] -translate-y-1/2"></div>
+                    <div className="absolute top-1/2 right-0 w-96 h-96 bg-neon-cyan/10 rounded-full blur-[120px] -translate-y-1/2"></div>
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                            className="mb-16 text-center"
+                        >
+                            <motion.h2 
+                                className="text-sm font-mono text-neon-pink mb-4 tracking-[0.2em] uppercase"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                            >
+                                Featured Work
+                            </motion.h2>
+                            <motion.h3 
+                                className="text-4xl md:text-6xl font-black text-white mb-4"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                Digital <span className="text-white">Creations</span>
+                            </motion.h3>
+                            <motion.p 
+                                className="text-gray-400 max-w-2xl mx-auto text-lg"
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                A collection of projects demonstrating proficiency in modern web development, from e-commerce solutions to AI integrations.
+                            </motion.p>
+                            
+                            <motion.p 
+                                className="text-neon-cyan text-sm mt-8 font-medium flex items-center justify-center gap-2"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                            >
+                                <span>← Drag to explore →</span>
+                            </motion.p>
+                        </motion.div>
+                        
+                        {/* Horizontal Scrolling Gallery */}
+                        <div className="relative" ref={constraintsRef}>
+                            <div 
+                                ref={scrollContainerRef}
+                                onScroll={handleScroll}
+                                onMouseEnter={() => setIsPaused(true)}
+                                onMouseLeave={() => setIsPaused(false)}
+                                onTouchStart={() => setIsPaused(true)}
+                                onTouchEnd={() => setIsPaused(false)}
+                                className="flex overflow-x-auto hide-scrollbar pb-8 cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+                            >
+                                {projects.map((project, index) => (
+                                    <ProjectCard key={index} project={project} index={index} />
+                                ))}
+                            </div>
+                            
+                            {/* Navigation Dots */}
+                            <div className="flex justify-center gap-3 mt-12">
+                                {projects.map((_, index) => (
+                                    <motion.button
+                                        key={index}
+                                        className="w-2.5 h-2.5 rounded-full bg-white/20"
+                                        whileHover={{ scale: 1.5, backgroundColor: "rgba(0, 243, 255, 0.8)" }}
+                                        animate={activeIndex === index ? { 
+                                            scale: 1.5, 
+                                            backgroundColor: "rgba(0, 243, 255, 1)" 
+                                        } : { 
+                                            scale: 1, 
+                                            backgroundColor: "rgba(255, 255, 255, 0.2)" 
+                                        }}
+                                        onClick={() => setActiveIndex(index)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Skill Grid
+        const SkillIcon = ({ name, iconUrl }) => {
+            return (
+                <motion.div
+                    whileHover={{ scale: 1.1, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-neon-purple/50 transition-all duration-300 cursor-pointer group"
+                >
+                    <div className="w-16 h-16 flex items-center justify-center p-3 bg-black/40 rounded-lg group-hover:shadow-[0_0_15px_rgba(188,19,254,0.3)] transition-shadow">
+                        <img src={iconUrl} alt={name} className="w-full h-full object-contain filter brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300" />
+                    </div>
+                    <span className="font-medium text-gray-300 group-hover:text-white transition-colors">{name}</span>
+                </motion.div>
+            );
+        };
+
+        const SkillSection = () => {
+            const skills = [
+                { name: "React", url: "https://cdn.simpleicons.org/react/61DAFB" },
+                { name: "JavaScript", url: "https://cdn.simpleicons.org/javascript/F7DF1E" },
+                { name: "HTML", url: "https://cdn.simpleicons.org/html5/E34F26" },
+                { name: "CSS", url: "https://cdn.simpleicons.org/css3/1572B6" },
+                { name: "Tailwind", url: "https://cdn.simpleicons.org/tailwindcss/06B6D4" },
+                { name: "Shadcn", url: "https://cdn.simpleicons.org/shadcnui/000000" },
+                { name: "Node.js", url: "https://cdn.simpleicons.org/nodedotjs/339933" },
+                { name: "Python", url: "https://cdn.simpleicons.org/python/3776AB" },
+                { name: "Django", url: "https://cdn.simpleicons.org/django/092E20" },
+                { name: "MongoDB", url: "https://cdn.simpleicons.org/mongodb/47A248" },
+                { name: "MySQL", url: "https://cdn.simpleicons.org/mysql/4479A1" },
+                { name: "GSAP", url: "https://cdn.simpleicons.org/greensock/88CE02" },
+                { name: "Framer Motion", url: "https://cdn.simpleicons.org/framer/0055FF" },
+                { name: "Cursor AI", url: "https://cdn.simpleicons.org/cursor/000000" },
+                { name: "Replit", url: "https://cdn.simpleicons.org/replit/F26207" },
+                { name: "Git", url: "https://cdn.simpleicons.org/git/F05032" },
+            ];
+
+            const container = {
+                hidden: { opacity: 0 },
+                show: {
+                    opacity: 1,
+                    transition: {
+                        staggerChildren: 0.1
+                    }
+                }
+            };
+
+            const item = {
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0 }
+            };
+
+            return (
+                <section className="py-32 bg-dark-bg relative" id="skills">
+                    <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-b from-neon-purple/5 to-transparent pointer-events-none"></div>
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="flex flex-col md:flex-row items-start gap-16">
+                            <div className="w-full md:w-1/3 sticky top-32">
+                                <motion.div
+                                    initial={{ opacity: 0, x: -30 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.6 }}
+                                >
+                                    <h2 className="text-sm font-mono text-neon-cyan mb-4 tracking-[0.2em] uppercase">Technical Arsenal</h2>
+                                    <h3 className="text-4xl md:text-5xl font-black text-white mb-6">Tools & <br/><span className="text-neon-purple">Technologies</span></h3>
+                                    <p className="text-gray-400 text-lg leading-relaxed mb-8">
+                                        I leverage a comprehensive stack of modern technologies to build scalable, high-performance applications. My expertise spans the entire development lifecycle from frontend design to backend architecture.
+                                    </p>
+                                    <div className="h-1 w-20 bg-neon-cyan rounded-full"></div>
+                                </motion.div>
+                            </div>
+                            
+                            <div className="w-full md:w-2/3">
+                                <motion.div 
+                                    variants={container}
+                                    initial="hidden"
+                                    whileInView="show"
+                                    viewport={{ once: true }}
+                                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                                >
+                                    {skills.map((skill, idx) => (
+                                        <motion.div key={idx} variants={item}>
+                                            <SkillIcon name={skill.name} iconUrl={skill.url} />
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Contact Section
+        const ContactSection = () => {
+            const [formState, setFormState] = useState({ name: '', email: '', message: '' });
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [isSuccess, setIsSuccess] = useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setIsSubmitting(true);
+
+                // TODO: Replace these with your actual EmailJS values
+                const SERVICE_ID = "service_aq89pzg";
+                const TEMPLATE_ID = "template_7c51t4d";
+
+                const templateParams = {
+                    from_name: formState.name,
+                    from_email: formState.email,
+                    message: formState.message,
+                };
+
+                if (typeof emailjs === 'undefined') {
+                    console.error('EmailJS SDK not loaded');
+                    setIsSubmitting(false);
+                    alert('Email service not available. Please try again later or email me directly.');
+                    return;
+                }
+
+                emailjs
+                    .send(SERVICE_ID, TEMPLATE_ID, templateParams)
+                    .then(() => {
+                        setIsSubmitting(false);
+                        setIsSuccess(true);
+                        setFormState({ name: '', email: '', message: '' });
+                        setTimeout(() => setIsSuccess(false), 5000);
+                    })
+                    .catch((error) => {
+                        console.error('EmailJS error:', error);
+                        setIsSubmitting(false);
+                        alert('Something went wrong while sending your message. Please try again or email me directly.');
+                    });
+            };
+
+            return (
+                <section className="py-32 relative bg-dark-bg overflow-hidden" id="contact">
+                    <div className="absolute inset-0 z-0">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                    </div>
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="flex flex-col lg:flex-row gap-16 items-center">
+                            <motion.div 
+                                initial={{ opacity: 0, x: -50 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6 }}
+                                className="w-full lg:w-1/2"
+                            >
+                                <h2 className="text-sm font-mono text-neon-pink mb-4 tracking-widest uppercase">Get In Touch</h2>
+                                <h3 className="text-4xl md:text-6xl font-bold text-white mb-6">Let's Build Something <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">Extraordinary</span></h3>
+                                <p className="text-gray-400 text-lg mb-8 max-w-md">
+                                    Have an idea? Let's discuss how we can bring your vision to life with cutting-edge technology and immersive design.
+                                </p>
+                                
+                                <div className="space-y-6">
+                                    <a href="mailto:hello@example.com" className="flex items-center p-4 glass-panel rounded-xl hover:bg-white/5 transition-colors group border border-blue-500/50">
+                                        <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-neon-cyan group-hover:scale-110 transition-transform">
+                                            <Mail size={20} />
+                                        </div>
+                                        <div className="ml-4">
+                                            <p className="text-sm text-gray-400">Email Me</p>
+                                            <p className="text-white font-medium text-lg">hello@example.com</p>
+                                        </div>
+                                    </a>
+                                    
+                                    <div className="flex gap-4 mt-8">
+                                        <motion.a href="#" whileHover={{ y: -5 }} className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-neon-purple hover:border-neon-purple transition-all">
+                                            <Github size={20} />
+                                        </motion.a>
+                                        <motion.a href="#" whileHover={{ y: -5 }} className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-blue-600 hover:border-blue-600 transition-all">
+                                            <Linkedin size={20} />
+                                        </motion.a>
+                                    </div>
+                                </div>
+                            </motion.div>
+                            
+                            <motion.div 
+                                initial={{ opacity: 0, x: 50 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                                className="w-full lg:w-1/2"
+                            >
+                                <form onSubmit={handleSubmit} className="glass-panel p-8 rounded-2xl border border-blue-500/60 shadow-[0_0_40px_rgba(59,130,246,0.35)] relative overflow-hidden">
+                                    <AnimatePresence>
+                                        {isSuccess && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.9 }}
+                                                className="absolute inset-0 z-50 bg-dark-bg/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
+                                            >
+                                                <motion.div 
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                                                    className="w-20 h-20 bg-neon-cyan/20 rounded-full flex items-center justify-center text-neon-cyan mb-4"
+                                                >
+                                                    <CheckCircle size={40} />
+                                                </motion.div>
+                                                <h3 className="text-2xl font-bold text-white mb-2">Message Sent!</h3>
+                                                <p className="text-gray-400">I'll get back to you as soon as possible.</p>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                    
+                                    <div className="mb-6 group">
+                                        <label className="block text-sm font-medium text-gray-400 mb-2 group-focus-within:text-neon-cyan transition-colors">Name</label>
+                                        <input 
+                                            type="text" 
+                                            required
+                                            value={formState.name}
+                                            onChange={(e) => setFormState({...formState, name: e.target.value})}
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-neon-cyan transition-colors placeholder-gray-600"
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-6 group">
+                                        <label className="block text-sm font-medium text-gray-400 mb-2 group-focus-within:text-neon-cyan transition-colors">Email</label>
+                                        <input 
+                                            type="email" 
+                                            required
+                                            value={formState.email}
+                                            onChange={(e) => setFormState({...formState, email: e.target.value})}
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-neon-cyan transition-colors placeholder-gray-600"
+                                            placeholder="john@example.com"
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-8 group">
+                                        <label className="block text-sm font-medium text-gray-400 mb-2 group-focus-within:text-neon-cyan transition-colors">Message</label>
+                                        <textarea 
+                                            rows="4"
+                                            required
+                                            value={formState.message}
+                                            onChange={(e) => setFormState({...formState, message: e.target.value})}
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-neon-cyan transition-colors placeholder-gray-600"
+                                            placeholder="Tell me about your project..."
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSubmitting}
+                                        className={`w-full py-4 rounded-lg font-bold relative overflow-hidden group disabled:opacity-70 transition-all
+                                            ${isSubmitting 
+                                                ? 'bg-neon-cyan text-black shadow-[0_0_30px_rgba(0,243,255,0.9)] border border-neon-cyan' 
+                                                : 'bg-neon-cyan text-black border border-neon-cyan'
+                                            }`}
+                                    >
+                                        <span className={`absolute inset-0 bg-white/20 transition-transform duration-300
+                                            ${isSubmitting ? 'translate-y-0' : 'translate-y-full'}`}></span>
+                                        <span className="relative flex items-center justify-center gap-2">
+                                            {isSubmitting ? 'Sending...' : <>Send Message <Send size={18} /></>}
+                                        </span>
+                                    </button>
+                                </form>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Footer = () => {
+            return (
+                <footer className="bg-black border-t border-white/10 py-12 relative overflow-hidden">
+                    <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center relative z-10">
+                        <div className="mb-6 md:mb-0">
+                            <h2 className="text-2xl font-black text-white tracking-tighter">
+                                KARTHICKS<span className="text-neon-cyan">.PORTFOLIO</span>
+                            </h2>
+                            <p className="text-gray-500 text-sm mt-2">© 2025 All rights reserved.</p>
+                        </div>
+                        
+                        <div className="flex gap-8 text-gray-400 text-sm">
+                            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+                            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                        </div>
+                    </div>
+                    
+                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neon-purple to-transparent opacity-50"></div>
+                </footer>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            return (
+                <div className="bg-dark-bg min-h-screen text-white selection:bg-neon-pink selection:text-white font-sans">
+                    <Cursor />
+                    <Navbar />
+                    
+                    {/* Hero Section */}
+                    <section className="h-screen w-full relative flex flex-col items-center justify-center overflow-hidden">
+                        <HeroVideoBackground />
+
+                        <div className="z-10 text-center px-4">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                            >
+                                <h2 className="text-neon-cyan font-mono text-sm md:text-base mb-6 tracking-[0.3em] uppercase">Full Stack Developer</h2>
+                                <h1 className="text-6xl md:text-9xl font-black mb-6 leading-none tracking-tighter">
+                                    CREATIVE<br/>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500 neon-text">ENGINEER</span>
+                                </h1>
+                                <p className="text-gray-400 max-w-xl mx-auto text-lg md:text-xl mb-10 leading-relaxed">
+                                    Crafting immersive digital experiences with modern web technologies and creative design patterns.
+                                </p>
+
+                                <motion.div 
+                                    className="flex justify-center gap-6"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                >
+                                    <a href="#projects" className="px-8 py-3 rounded-full bg-white text-black font-bold hover:bg-gray-200 transition-colors">View Work</a>
+                                    <a href="#contact" className="px-8 py-3 rounded-full border border-white/20 hover:bg-white/10 transition-colors backdrop-blur-sm">Contact Me</a>
+                                </motion.div>
+                            </motion.div>
+                        </div>
+                        
+                        <div className="absolute bottom-10 w-full flex justify-center z-10">
+                            <motion.div 
+                                animate={{ y: [0, 10, 0] }} 
+                                transition={{ repeat: Infinity, duration: 1.5 }}
+                                className="flex flex-col items-center opacity-50"
+                            >
+                                <span className="text-xs text-white mb-2 tracking-widest uppercase">Scroll</span>
+                                <div className="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+                            </motion.div>
+                        </div>
+                    </section>
+
+                    <SkillMarquee />
+
+                    {/* About Section with 3D Robot */}
+                    <section className="py-32 bg-dark-bg relative overflow-hidden" id="about">
+                        <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/5 via-transparent to-neon-cyan/5 pointer-events-none"></div>
+                        
+                        <div className="container mx-auto px-6 relative z-10">
+                            <div className="flex flex-col lg:flex-row items-center gap-16">
+                                {/* 3D Robot Profile */}
+                                <motion.div 
+                                    initial={{ opacity: 0, x: -50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8 }}
+                                    className="w-full lg:w-5/12 flex justify-center"
+                                >
+                                    <Robot3D />
+                                </motion.div>
+                                
+                                {/* Profile Content */}
+                                <motion.div 
+                                    initial={{ opacity: 0, x: 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: 0.2 }}
+                                    className="w-full lg:w-7/12"
+                                >
+                                    <motion.h2 
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.3 }}
+                                        className="text-sm font-mono text-neon-pink mb-4 tracking-[0.2em] uppercase"
+                                    >
+                                        About Me
+                                    </motion.h2>
+                                    
+                                    <motion.h3 
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.4 }}
+                                        className="text-4xl md:text-6xl font-black text-white mb-4"
+                                    >
+                                        Karthick <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">S</span>
+                                    </motion.h3>
+                                    
+                                    <motion.p 
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.5 }}
+                                        className="text-xl text-neon-cyan mb-6 font-semibold"
+                                    >
+                                        Full Stack Developer 
+                                    </motion.p>
+                                    
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        whileInView={{ opacity: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.6 }}
+                                        className="space-y-4 text-gray-300 text-lg leading-relaxed mb-10"
+                                    >
+                                        <p>
+                                            I'm a fresh BCA graduate from <span className="text-neon-cyan font-semibold">American College</span>, passionate about transforming ideas into dynamic digital experiences. My journey into web development started with curiosity and has evolved into a dedicated career path focused on modern technologies and innovative solutions.
+                                        </p>
+                                        <p>
+                                            Recently, I completed a <span className="text-neon-purple font-semibold">3-month intensive internship</span> where I gained hands-on experience in full-stack development, working on real-world projects including e-commerce platforms, AI-powered chatbots, and responsive web applications. This experience sharpened my skills in React, Node.js, and modern development workflows.
+                                        </p>
+                                        <p>
+                                            I specialize in building <span className="text-neon-cyan font-semibold">scalable web applications</span> using the latest technologies like React, Tailwind CSS, and AI tools like <span className="text-neon-pink font-semibold">Cursor AI</span> and <span className="text-neon-pink font-semibold">Replit AI</span>. I'm proficient in both frontend and backend development, with expertise in creating seamless user experiences and robust server-side solutions.
+                                        </p>
+                                        <p>
+                                            When I'm not coding, you'll find me exploring cutting-edge AI tools, contributing to open-source projects, building portfolio pieces, and staying updated with the latest web development trends. I'm actively seeking opportunities to contribute to innovative projects and grow as a developer.
+                                        </p>
+                                    </motion.div>
+                                    
+                                    {/* Stats Grid */}
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 30 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.7 }}
+                                        className="grid grid-cols-3 gap-6"
+                                    >
+                                        <div className="glass-panel p-6 rounded-xl text-center border border-white/10 hover:border-neon-cyan/50 transition-all">
+                                            <motion.h4 
+                                                initial={{ scale: 0 }}
+                                                whileInView={{ scale: 1 }}
+                                                viewport={{ once: true }}
+                                                transition={{ delay: 0.8, type: "spring" }}
+                                                className="text-3xl font-black text-neon-cyan mb-2"
+                                            >
+                                                Fresher
+                                            </motion.h4>
+                                            <p className="text-sm text-gray-400 uppercase tracking-wide">Experience Level</p>
+                                        </div>
+                                        
+                                        <div className="glass-panel p-6 rounded-xl text-center border border-white/10 hover:border-neon-purple/50 transition-all">
+                                            <motion.h4 
+                                                initial={{ scale: 0 }}
+                                                whileInView={{ scale: 1 }}
+                                                viewport={{ once: true }}
+                                                transition={{ delay: 0.9, type: "spring" }}
+                                                className="text-4xl font-black text-neon-purple mb-2"
+                                            >
+                                                50+
+                                            </motion.h4>
+                                            <p className="text-sm text-gray-400 uppercase tracking-wide">Projects Completed</p>
+                                        </div>
+                                        
+                                        <div className="glass-panel p-6 rounded-xl text-center border border-white/10 hover:border-neon-pink/50 transition-all">
+                                            <motion.h4 
+                                                initial={{ scale: 0 }}
+                                                whileInView={{ scale: 1 }}
+                                                viewport={{ once: true }}
+                                                transition={{ delay: 1.0, type: "spring" }}
+                                                className="text-4xl font-black text-neon-pink mb-2"
+                                            >
+                                                30+
+                                            </motion.h4>
+                                            <p className="text-sm text-gray-400 uppercase tracking-wide">Happy Clients</p>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <ProjectShowcase />
+                    
+                    <SkillSection />
+
+                    <ContactSection />
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
